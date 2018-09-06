@@ -1,4 +1,4 @@
-from saml import client
+from saml2 import client
 from test_schema import build_authentication_request_simple
 from six.moves.urllib.parse import quote_plus
 
