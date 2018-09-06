@@ -4,8 +4,8 @@ import zlib
 import six
 from six.moves.urllib.parse import urlencode, parse_qs, unquote_plus
 from lxml import etree
-from saml import schema
-from saml.schema.base import _element_registry
+from saml2 import schema
+from saml2.schema.base import _element_registry
 
 
 def send(uri, message, relay_state=None, protocol='redirect'):

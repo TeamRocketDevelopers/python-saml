@@ -1,4 +1,4 @@
-from saml.schema import utils
+from saml2.schema import utils
 
 
 class TestPascalize:

@@ -1,7 +1,7 @@
-import saml
+import saml2
 import xmlsec
-from saml import schema
-from saml.schema import utils
+from saml2 import schema
+from saml2.schema import utils
 from datetime import datetime
 from lxml import etree
 from os import path
