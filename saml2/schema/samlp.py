@@ -83,7 +83,7 @@ class AuthenticationRequest(_Message):
     """
     Create a SAML AuthnRequest
     ::
-        from saml import schema
+        from saml2 import schema
         from datetime import datetime
 
         document = schema.AuthenticationRequest()
@@ -117,6 +117,7 @@ class AuthenticationRequest(_Message):
                 Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
                 AllowCreate="true"/>
         </samlp:AuthnRequest>
+
     """
 
     class Meta:
@@ -276,7 +277,7 @@ class Response(StatusResponse):
     """
     Create a SAML Response
     ::
-        from saml import schema
+        from saml2 import schema
         from datetime import datetime
 
         document = schema.Response()
@@ -426,7 +427,7 @@ class LogoutRequest(_Message):
     """
     Create a SAML LogoutRequest
     ::
-        from saml import schema
+        from saml2 import schema
         from datetime import datetime
 
         document = schema.LogoutRequest()
@@ -486,7 +487,7 @@ class LogoutResponse(StatusResponse):
     """
     Create a SAML LogoutResponse
     ::
-        from saml import schema
+        from saml2 import schema
         from datetime import datetime
 
         document = schema.LogoutResponse()

@@ -6,22 +6,28 @@ Sign and verify signatures using the `python-xmlsec` library.
 .. autofunction:: sign
 .. autofunction:: verify
 """
+from saml2.schema import constants as co
 
 
-def sign(xml, stream, password=None):
+def sign(xml, key_file, cert_file=None, password=None,
+         sign_algorithm=co.SIGN_CRYPT.rsa_sha1,
+         digest_algorithm=co.SIGN_CRYPT.sha1):
     """
     Sign an XML document with the given private key file. This will add a
     <Signature> element to the document.
 
     :param lxml.etree._Element xml: The document to sign
-    :param file stream: The private key to sign the document with
+    :param file key_file: The x509 private key to sign the document with
+    :param file cert_file: The x509 cert to sign the document with
     :param str password: The password used to access the private key
+    :param const sign_algorithm: The sign algorithm to use.
+    :param const digest_algorithm: The digest algorithm to use.
 
     :rtype: None
 
     Example usage:
     ::
-        from saml import schema
+        from saml2 import schema
         from lxml import etree
 
         document = schema.AuthenticationRequest()
@@ -77,31 +83,59 @@ def sign(xml, stream, password=None):
     # case we don't need it.
     import xmlsec
 
+    # Set sign algorithm to use
+    sign_map = {
+        co.SIGN_CRYPT.dsa_sha1: xmlsec.Transform.DSA_SHA1,
+        co.SIGN_CRYPT.rsa_sha1: xmlsec.Transform.RSA_SHA1,
+        co.SIGN_CRYPT.rsa_sha256: xmlsec.Transform.RSA_SHA256,
+        co.SIGN_CRYPT.rsa_sha384: xmlsec.Transform.RSA_SHA384,
+        co.SIGN_CRYPT.rsa_sha512: xmlsec.Transform.RSA_SHA512,
+    }
+    sign_algorithm_transform = sign_map.get(
+        sign_algorithm, co.SIGN_CRYPT.rsa_sha1)
+
     # Resolve the SAML/2.0 element in question.
-    from saml.schema.base import _element_registry
+    from saml2.schema.base import _element_registry
     element = _element_registry.get(xml.tag)
 
     # Create a signature template for RSA-SHA1 enveloped signature.
     signature_node = xmlsec.template.create(
         xml,
         xmlsec.Transform.EXCL_C14N,
-        xmlsec.Transform.RSA_SHA1)
+        sign_algorithm_transform,
+        ns='ds')
 
     # Add the <ds:Signature/> node to the document.
     xml.insert(element.meta.signature_index, signature_node)
 
     # Add the <ds:Reference/> node to the signature template.
+    digest_map = {
+        co.SIGN_CRYPT.sha1: xmlsec.Transform.SHA1,
+        co.SIGN_CRYPT.sha256: xmlsec.Transform.SHA256,
+        co.SIGN_CRYPT.sha384: xmlsec.Transform.SHA384,
+        co.SIGN_CRYPT.sha512: xmlsec.Transform.SHA512,
+    }
+    digest_algorithm_transform = digest_map.get(
+        digest_algorithm, co.SIGN_CRYPT.sha1)
+
     ref = xmlsec.template.add_reference(
-        signature_node, xmlsec.Transform.SHA1)
+        signature_node, digest_algorithm_transform)
 
     # Add the enveloped transform descriptor.
     xmlsec.template.add_transform(ref, xmlsec.Transform.ENVELOPED)
+    xmlsec.template.add_transform(ref, xmlsec.Transform.EXCL_C14N)
+    key_info = xmlsec.template.ensure_key_info(signature_node)
+    xmlsec.template.add_x509_data(key_info)
 
     # Create a digital signature context (no key manager is needed).
     ctx = xmlsec.SignatureContext()
 
     # Load private key.
-    key = xmlsec.Key.from_memory(stream, xmlsec.KeyFormat.PEM, password)
+    key = xmlsec.Key.from_memory(key_file, xmlsec.KeyFormat.PEM, password)
+
+    # Load the public cert if given.
+    if cert_file:
+        key.load_cert_from_memory(cert_file, xmlsec.KeyFormat.PEM)
 
     # Set the key on the context.
     ctx.key = key
@@ -149,7 +183,7 @@ def verify(xml, stream):
         try:
             key = xmlsec.Key.from_memory(stream, fmt)
             break
-        except ValueError:  
+        except ValueError:
             # xmlsec now throws when it can't load the key
             pass
 

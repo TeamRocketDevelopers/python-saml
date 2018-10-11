@@ -5,19 +5,19 @@ Create XML documents in accordance with the SAML 2.0 specification
 
 AuthnRequest
 ------------
-.. autoclass:: saml.schema.AuthenticationRequest
+.. autoclass:: saml2.schema.AuthenticationRequest
 
 Response
 --------
-.. autoclass:: saml.schema.Response
+.. autoclass:: saml2.schema.Response
 
 LogoutRequest
 -------------
-.. autoclass:: saml.schema.LogoutRequest
+.. autoclass:: saml2.schema.LogoutRequest
 
 LogoutResponse
 --------------
-.. autoclass:: saml.schema.LogoutResponse
+.. autoclass:: saml2.schema.LogoutResponse
 """
 
 from .meta import version as VERSION  # noqa

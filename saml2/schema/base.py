@@ -25,6 +25,7 @@ class Options(object):
         # Index into the elements of where we stick the signature block.
         self.signature_index = meta.get('signature_index', 1)
 
+
 # Element registry in order to lookup for deserialize.
 _element_registry = {}
 
